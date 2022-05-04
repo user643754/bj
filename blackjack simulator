@@ -1,0 +1,228 @@
+'''
+blackjack simulator
+v0.0.1
+open source i guess
+'''
+import random
+dosh = 0
+play=True
+global count
+count = int(input("Enter the true count: "))
+
+cards = "23456789TJQKA"
+rounds = input("Please enter the number of rounds you\'d like to simulate: ")
+def r():
+    countc = ((5/13)+(count/104))*1000000
+    sec = random.randint(0,999999)
+    if sec < (3000000/13):
+        return "789"[random.randint(0,2)]
+    elif sec < (3000000/13) + countc:
+        return "TJQKA"[random.randint(0,4)]
+    else:
+        return "23456"[random.randint(0,4)]
+    #return cards[random.randint(0,12)]
+def game(bet,upcard,hand):
+    playerbust=False
+    print("Dealer: "+upcard+"\nPlayer: "+hand)
+    print(calctot(hand))
+    loop = True
+    while loop:
+        c = calctot(hand)
+        q = bs(hand,c[0],c[1],upcard)
+        print(q)
+        if q in ["y","yes","card","hit","h","c"]:
+            hand = hand+r()
+            c = calctot(hand)
+            print(hand)
+            print(calctot(hand))
+            if (c[0]>21 and c[1]==False) or (c[0]>31 and c[1]==True):
+                playerbust=True
+                loop=False
+            elif (c[0]>20 and c[1]==False) or (c[0]>30 and c[1]==True):
+                
+                loop=False
+        elif (q in ["n","no","no card","stand","s","nc"]) or (c[0]>20 and c[1]==False) or (c[0]>30 and c[1]==True):
+            loop = False
+        elif (q in ["d","double","dd","d d","double down"])and(len(hand)==2):
+            bet = bet*2
+            hand = hand+r()
+            c = calctot(hand)
+            print(hand)
+            print(calctot(hand))
+            if (c[0]>21 and c[1]==False) or (c[0]>31 and c[1]==True):
+                playerbust=True
+            loop=False
+        elif (q in ["sp","split","pair","p"])and(hand[0]==hand[1])and(len(hand)==2):
+            game(bet,upcard,hand[0]+r())
+            game(bet,upcard,hand[1]+r())
+            return 0
+    
+    d=dealerbust(upcard)
+    if c == [21,True]:
+        return bet*1.5
+    if c[1] == True and c[0]>21:
+        c = [c[0]-10,False]
+    if playerbust==True:
+        return -bet
+    elif d == "bust":
+        return bet
+    elif d>c[0]:
+        return -bet
+    elif d==c[0]:
+        return 0
+    else:
+        return bet
+        
+def calctot(n):
+    total = 0
+    soft = False
+    for i in n:
+        num = i
+        if num in ["T","J","Q","K"]:
+            num = 10
+        if num == "A":
+            if soft == True:
+                total = total + 1
+            else:
+                soft = True
+                total = total + 11
+        else:
+            total = total + int(num)
+    return [total,soft]
+def dealerbust(n):
+    dh = n + r()
+    print(dh)
+    c=calctot(dh)
+    if (c[0]>21 and c[1]==False) or (c[0]>31 and c[1]==True):
+        return "bust"
+    elif (c[0]>16 and c[1]==False) or (c[0]>26 and c[1]==True)or(c[0]>16 and c[0]<22 and (c[1] == True)):
+        if (c[1] == False)or(c[1]==True and c[0]<22):
+            return c[0]
+        else:
+            return c[0]-10
+    else:
+        return dealerbust(dh)
+def cnear(co,n):
+    return ((n-0.5)<co and co<(n+0.5))
+def bs(hand,total,soft,upcard):
+    stotal = str(total)
+    if True: #cnear(count,0) <--- may be used in future
+        if hand in "AA 22 33 44 66 77 88 99 TT JJ QQ KK":
+            if hand == "AA":
+                if upcard == "A":
+                    return "h"
+                else:
+                    return "p"
+            elif hand in "2233":
+                if upcard in "234567":
+                    return "p"
+                else:
+                    return "h"
+            elif hand == "44":
+                if upcard in "56":
+                    return "p"
+                else:
+                    return "h"
+            elif hand == "66":
+                if upcard in "23456":
+                    return "p"
+                else:
+                    return "h"
+            elif hand == "77":
+                if upcard in "234567":
+                    return "p"
+                else:
+                    return "h"
+            elif hand == "88":
+                if upcard in "23456789":
+                    return "p"
+                else:
+                    return "h"
+            elif hand == "99":
+                if upcard in "2345689":
+                    return "p"
+                else:
+                    return "s"
+            else:
+                return "s"
+        elif (soft == True and total<22):
+            if stotal in "13 14":
+                if upcard in "56":
+                    return dh(hand)
+                else:
+                    return "h"
+            elif stotal in "15 16":
+                if upcard in "456":
+                    return dh(hand)
+                else:
+                    return "h"
+            elif total == 17:
+                if upcard in "3456":
+                    return dh(hand)
+                else:
+                    return "h"
+            elif total == 18:
+                if upcard in "3456":
+                    return ds(hand)
+                elif upcard in "278":
+                    return "s"
+                else:
+                    return "h"
+            else:
+                return "s"
+        else:
+            if soft == True:
+                total = total - 10
+            stotal = str(total)
+            if total <9:
+                return "h"
+            elif total==9:
+                if upcard in "3456":
+                    return dh(hand)
+                else:
+                    return "h"
+            elif stotal in "10 11":
+                if upcard in "23456789":
+                    return dh(hand)
+                else:
+                    return "h"
+            elif total == 12:
+                if upcard in "456":
+                    return "s"
+                else:
+                    return "h"
+            elif stotal in "13 14 15 16":
+                if upcard in "23456":
+                    return "s"
+                else:
+                    return "h"
+            else:
+                return "s"
+
+def dh(hand):
+    if len(hand) == 2:
+        return "d"
+    else:
+        return "h"
+def ds(hand):
+    if len(hand) == 2:
+        return "d"
+    else:
+        return "s"
+'''
+while play:
+    m=game(1,r(),r()+r())
+    dosh=dosh+m
+    print("You now have "+str(dosh))
+    j=input("Play again?\n")
+    if j in ["no","n"]:
+        play=False
+'''
+
+for i in range(int(rounds)):
+    m=game(1,r(),r()+r())
+    dosh=dosh+m
+    print("You now have "+str(dosh))
+print("Value of the game: "+str(dosh/int(rounds))+"\nTC: "+str(count))
+input()
+
