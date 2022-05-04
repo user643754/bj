@@ -1,16 +1,23 @@
 '''
 blackjack simulator
-v0.0.1
+v0.0.2
 open source i guess
 '''
 import random
 dosh = 0
 play=True
 global count
+global cpu
+rounds = 0
+if input("Will this be a computer simulation? ") in "yes":
+    cpu = True
+    rounds = input("Please enter the number of rounds you\'d like to simulate: ")
+else:
+    cpu = False
 count = int(input("Enter the true count: "))
 
 cards = "23456789TJQKA"
-rounds = input("Please enter the number of rounds you\'d like to simulate: ")
+
 def r():
     countc = ((5/13)+(count/104))*1000000
     sec = random.randint(0,999999)
@@ -28,7 +35,10 @@ def game(bet,upcard,hand):
     loop = True
     while loop:
         c = calctot(hand)
-        q = bs(hand,c[0],c[1],upcard)
+        if cpu:
+            q = bs(hand,c[0],c[1],upcard)
+        else:
+            q = input()
         print(q)
         if q in ["y","yes","card","hit","h","c"]:
             hand = hand+r()
@@ -58,7 +68,7 @@ def game(bet,upcard,hand):
             return 0
     
     d=dealerbust(upcard)
-    if c == [21,True]:
+    if c == [21,True] and d!=21:
         return bet*1.5
     if c[1] == True and c[0]>21:
         c = [c[0]-10,False]
@@ -209,20 +219,22 @@ def ds(hand):
         return "d"
     else:
         return "s"
-'''
-while play:
-    m=game(1,r(),r()+r())
-    dosh=dosh+m
-    print("You now have "+str(dosh))
-    j=input("Play again?\n")
-    if j in ["no","n"]:
-        play=False
-'''
+if cpu:
 
-for i in range(int(rounds)):
-    m=game(1,r(),r()+r())
-    dosh=dosh+m
-    print("You now have "+str(dosh))
-print("Value of the game: "+str(dosh/int(rounds))+"\nTC: "+str(count))
-input()
+
+    for i in range(int(rounds)):
+        m=game(1,r(),r()+r())
+        dosh=dosh+m
+        print("You now have "+str(dosh))
+    print("Value of the game: "+str(dosh/int(rounds))+"\nTC: "+str(count))
+    input()
+else:
+
+    while play:
+        m=game(1,r(),r()+r())
+        dosh=dosh+m
+        print("You now have "+str(dosh))
+        j=input("Play again?\n")
+        if j in ["no","n"]:
+            play=False
 
